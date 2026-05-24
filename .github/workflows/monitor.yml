@@ -1,0 +1,50 @@
+name: Canyon Verfügbarkeits-Monitor
+
+on:
+  # Läuft automatisch alle 10 Minuten (24/7 auf GitHub-Servern)
+  schedule:
+    - cron: "*/10 * * * *"
+
+  # Manueller Start über GitHub UI (zum Testen)
+  workflow_dispatch:
+    inputs:
+      force_notify:
+        description: "Test-E-Mail senden (auch wenn nicht verfügbar)"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  check:
+    name: Verfügbarkeit prüfen
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # ── 1. Repository auschecken ──────────────────────────────
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      # ── 2. Python einrichten ──────────────────────────────────
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ── 3. Verfügbarkeit prüfen & ggf. Benachrichtigungen senden ─────────
+      - name: Canyon-Monitor ausführen
+        env:
+          SMTP_SERVER:        ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT:          ${{ secrets.SMTP_PORT }}
+          SMTP_USER:          ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD:      ${{ secrets.SMTP_PASSWORD }}
+          NOTIFY_EMAIL:       ${{ secrets.NOTIFY_EMAIL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+          FORCE_NOTIFY:       ${{ github.event.inputs.force_notify }}
+        run: python scripts/check_availability.py
+
+      # ── 4. Ergebnis im Log festhalten ─────────────────────────
+      - name: Zeitstempel notieren
+        if: always()
+        run: echo "Lauf abgeschlossen um $(date -u '+%d.%m.%Y %H:%M:%S') UTC"
