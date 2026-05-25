@@ -89,8 +89,10 @@ NOTIFY_EMAIL  = os.environ.get("NOTIFY_EMAIL", "")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")  # von @BotFather
 TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "")    # deine Chat-ID
 
-# Manueller Test-Modus (gesetzt via workflow_dispatch input)
+# Tagestest- oder manueller Test-Modus (gesetzt via Workflow)
 FORCE_NOTIFY = os.environ.get("FORCE_NOTIFY", "false").lower() == "true"
+DAILY_TEST   = os.environ.get("FORCE_NOTIFY", "false").lower() == "true" and \
+               os.environ.get("GITHUB_EVENT_NAME", "") == "schedule"
 
 # ─────────────────────────────────────────────
 # VERFÜGBARKEIT PRÜFEN
@@ -162,11 +164,15 @@ def send_email(bike: dict, status_text: str):
         print("  ⚠  E-Mail-Zugangsdaten fehlen – übersprungen.")
         return
 
-    subject = f"🚴 Canyon {bike['name']} ({bike['color']}, {bike['size']}) ist verfügbar!"
+    prefix     = "📋 Täglicher Statusbericht" if DAILY_TEST else "🚴 Verfügbar"
+    subject    = f"{prefix}: Canyon {bike['name']} ({bike['color']}, {bike['size']})"
+    headline   = "📋 Täglicher Statusbericht" if DAILY_TEST else "🚴 Dein Canyon-Bike ist verfügbar!"
+    note       = "<p style='font-size:13px;color:#e8401c;'><b>ℹ️ Dies ist dein automatischer Tagesbericht – kein echtes Verfügbarkeitssignal.</b></p>" if DAILY_TEST else ""
 
     html_body = f"""
     <html><body style="font-family:sans-serif;max-width:600px;margin:auto;padding:20px;">
-      <h2 style="color:#e8401c;">🚴 Dein Canyon-Bike ist verfügbar!</h2>
+      <h2 style="color:#e8401c;">{headline}</h2>
+      {note}
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         <tr>
           <td style="padding:8px 0;color:#666;font-size:14px;width:120px;">Modell</td>
@@ -276,7 +282,9 @@ def main():
     timestamp = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     print(f"[{timestamp}] Canyon-Monitor startet – {len(BIKES)} Rad/Räder werden geprüft\n")
 
-    if FORCE_NOTIFY:
+    if DAILY_TEST:
+        print("📋 TÄGLICHER STATUSBERICHT – Benachrichtigungen werden unabhängig vom Status gesendet!\n")
+    elif FORCE_NOTIFY:
         print("⚠  FORCE_NOTIFY aktiv – Benachrichtigungen werden unabhängig vom Status gesendet!\n")
 
     any_available = False
