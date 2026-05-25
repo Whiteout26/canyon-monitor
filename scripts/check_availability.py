@@ -41,6 +41,28 @@ BIKES = [
             "&dwvar_4537_pv_rahmengroesse=L"
         ),
     },
+    {
+        "name": "Aeroad CF SLX 8 AXS",
+        "color": "Kaze",
+        "size": "L",
+        "url": (
+            "https://www.canyon.com/de-de/rennrad/aero-rennrad/aeroad/cf-slx/"
+            "aeroad-cf-slx-8-axs/4550.html"
+            "?dwvar_4550_pv_rahmenfarbe=R107_P04"
+            "&dwvar_4550_pv_rahmengroesse=L"
+        ),
+    },
+    {
+        "name": "Aeroad CF SLX 8 AXS",
+        "color": "Midnight Blaze",
+        "size": "L",
+        "url": (
+            "https://www.canyon.com/de-de/rennrad/aero-rennrad/aeroad/cf-slx/"
+            "aeroad-cf-slx-8-axs/4550.html"
+            "?dwvar_4550_pv_rahmenfarbe=R107_P05"
+            "&dwvar_4550_pv_rahmengroesse=L"
+        ),
+    },
     # Weiteres Rad ergänzen:
     # {
     #     "name": "Modellname",
